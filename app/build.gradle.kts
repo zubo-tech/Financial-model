@@ -30,12 +30,16 @@ android {
       storePassword = System.getenv("STORE_PASSWORD") ?: "password123"
       keyAlias = "upload"
       keyPassword = System.getenv("KEY_PASSWORD") ?: "password123"
+      enableV1Signing = true
+      enableV2Signing = true
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
       storePassword = "android"
       keyAlias = "androiddebugkey"
       keyPassword = "android"
+      enableV1Signing = true
+      enableV2Signing = true
     }
   }
 
