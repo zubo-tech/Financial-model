@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Solar Malawi Model"
+rootProject.name = "PrecisionIQ App"
 
 include(":app")

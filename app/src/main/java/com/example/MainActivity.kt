@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -146,7 +148,7 @@ fun WelcomingPageScreen(
                         .background(Color(0xFF10B981), RoundedCornerShape(4.dp))
                 )
                 Text(
-                    text = "MALAWIAN FRONTIER GRID",
+                    text = "PRECISIONIQ INTELLIGENCE",
                     color = TextMuted,
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
@@ -182,8 +184,8 @@ fun WelcomingPageScreen(
                 colors = CardDefaults.cardColors(containerColor = CardSlate)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.img_solar_welcoming_1784143234403),
-                    contentDescription = "Malawi Solar Array Illustration",
+                    painter = painterResource(id = R.drawable.img_precision_banner_1784151211055),
+                    contentDescription = "PrecisionIQ Banner",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -192,7 +194,7 @@ fun WelcomingPageScreen(
             // Headline Block
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Solar Financial Forecaster",
+                    text = "PrecisionIQ App",
                     color = TextLight,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
@@ -500,7 +502,7 @@ fun WelcomingLoadingScreen(
                     .scale(pulseScale)
             ) {
                 Text(
-                    text = "☀️",
+                    text = "📈",
                     fontSize = 44.sp,
                     color = SolarAmber,
                     textAlign = TextAlign.Center
@@ -510,7 +512,7 @@ fun WelcomingLoadingScreen(
             Spacer(modifier = Modifier.height(36.dp))
 
             Text(
-                text = "SOLAR FINANCIAL FORECASTER",
+                text = "PRECISIONIQ APP",
                 color = SolarAmber,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
@@ -521,7 +523,7 @@ fun WelcomingLoadingScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "MW-100KW-GRID-A",
+                text = "FINANCIAL FORECASTER",
                 color = TextLight.copy(alpha = 0.9f),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Light,
@@ -846,8 +848,8 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
-                text = { Text("Dashboard", fontWeight = FontWeight.Bold, fontSize = 11.sp) },
-                icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard", modifier = Modifier.size(20.dp)) },
+                text = { Text("Dashboard", fontWeight = FontWeight.Bold, fontSize = 10.sp) },
+                icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard", modifier = Modifier.size(18.dp)) },
                 selectedContentColor = SolarAmber,
                 unselectedContentColor = TextMuted,
                 modifier = Modifier.testTag("tab_dashboard")
@@ -855,26 +857,35 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text("Statements", fontWeight = FontWeight.Bold, fontSize = 11.sp) },
-                icon = { Icon(Icons.Default.Analytics, contentDescription = "Statements", modifier = Modifier.size(20.dp)) },
+                text = { Text("Inputs", fontWeight = FontWeight.Bold, fontSize = 10.sp) },
+                icon = { Icon(Icons.Default.Tune, contentDescription = "Inputs Form", modifier = Modifier.size(18.dp)) },
+                selectedContentColor = SolarAmber,
+                unselectedContentColor = TextMuted,
+                modifier = Modifier.testTag("tab_inputs")
+            )
+            Tab(
+                selected = selectedTab == 2,
+                onClick = { selectedTab = 2 },
+                text = { Text("Statements", fontWeight = FontWeight.Bold, fontSize = 10.sp) },
+                icon = { Icon(Icons.Default.Analytics, contentDescription = "Statements", modifier = Modifier.size(18.dp)) },
                 selectedContentColor = SolarAmber,
                 unselectedContentColor = TextMuted,
                 modifier = Modifier.testTag("tab_statements")
             )
             Tab(
-                selected = selectedTab == 2,
-                onClick = { selectedTab = 2 },
-                text = { Text("Risk Module", fontWeight = FontWeight.Bold, fontSize = 11.sp) },
-                icon = { Icon(Icons.Default.Security, contentDescription = "Risk", modifier = Modifier.size(20.dp)) },
+                selected = selectedTab == 3,
+                onClick = { selectedTab = 3 },
+                text = { Text("Risk Module", fontWeight = FontWeight.Bold, fontSize = 10.sp) },
+                icon = { Icon(Icons.Default.Security, contentDescription = "Risk", modifier = Modifier.size(18.dp)) },
                 selectedContentColor = SolarAmber,
                 unselectedContentColor = TextMuted,
                 modifier = Modifier.testTag("tab_risk")
             )
             Tab(
-                selected = selectedTab == 3,
-                onClick = { selectedTab = 3 },
-                text = { Text("Python Export", fontWeight = FontWeight.Bold, fontSize = 11.sp) },
-                icon = { Icon(Icons.Default.Code, contentDescription = "Export", modifier = Modifier.size(20.dp)) },
+                selected = selectedTab == 4,
+                onClick = { selectedTab = 4 },
+                text = { Text("Python Export", fontWeight = FontWeight.Bold, fontSize = 10.sp) },
+                icon = { Icon(Icons.Default.Code, contentDescription = "Export", modifier = Modifier.size(18.dp)) },
                 selectedContentColor = SolarAmber,
                 unselectedContentColor = TextMuted,
                 modifier = Modifier.testTag("tab_export")
@@ -1037,9 +1048,10 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
         ) {
             when (selectedTab) {
                 0 -> DashboardTab(outputs, inputs)
-                1 -> ProjectionsTab(outputs)
-                2 -> RiskModuleTab(outputs)
-                3 -> ExportTab(FinancialEngine.getPythonExcelCode())
+                1 -> InputsFormTab(inputs = inputs, onInputsChanged = { inputs = it })
+                2 -> ProjectionsTab(outputs)
+                3 -> RiskModuleTab(outputs, inputs)
+                4 -> ExportTab(FinancialEngine.getPythonExcelCode(inputs))
             }
         }
     }
@@ -1244,6 +1256,460 @@ fun ViabilityMetricCard(
 }
 
 // ==============================================================================
+// 1.5. TABS: DETAILED FINANCIAL INPUTS FORM
+// ==============================================================================
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FormTextField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    prefix: String = "",
+    suffix: String = "",
+    testTag: String = ""
+) {
+    val isValid = value.trim().isNotEmpty() && value.toDoubleOrNull() != null
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label, color = if (isValid) TextMuted else Color.Red, fontSize = 11.sp) },
+        leadingIcon = if (prefix.isNotEmpty()) { { Text(prefix, color = SolarAmber, fontSize = 12.sp, fontWeight = FontWeight.Bold) } } else null,
+        trailingIcon = if (suffix.isNotEmpty()) { { Text(suffix, color = TextMuted, fontSize = 11.sp) } } else null,
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = TextLight,
+            unfocusedTextColor = TextLight,
+            focusedBorderColor = if (isValid) SolarAmber else Color.Red,
+            unfocusedBorderColor = if (isValid) BorderSlate else Color.Red.copy(alpha = 0.5f),
+            focusedLabelColor = SolarAmber,
+            unfocusedLabelColor = TextMuted,
+            focusedContainerColor = CardSlate,
+            unfocusedContainerColor = CardSlate
+        ),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(testTag)
+            .padding(vertical = 4.dp)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputsFormTab(
+    inputs: FinancialEngine.ModelInputs,
+    onInputsChanged: (FinancialEngine.ModelInputs) -> Unit
+) {
+    // Local text states initialized from current active inputs
+    var capexStr by remember(inputs.capex) { mutableStateOf(inputs.capex.toInt().toString()) }
+    var usefulLifeStr by remember(inputs.usefulLifeYears) { mutableStateOf(inputs.usefulLifeYears.toString()) }
+    var staffingStr by remember(inputs.staffingOpexUsd) { mutableStateOf(inputs.staffingOpexUsd.toInt().toString()) }
+    var maintenanceStr by remember(inputs.maintenanceOpexUsd) { mutableStateOf(inputs.maintenanceOpexUsd.toInt().toString()) }
+    var batteryStr by remember(inputs.batteryOpexUsd) { mutableStateOf(inputs.batteryOpexUsd.toInt().toString()) }
+    var hhTariffStr by remember(inputs.hhRatePerKwh) { mutableStateOf(inputs.hhRatePerKwh.toString()) }
+    var bizTariffStr by remember(inputs.bizRatePerKwh) { mutableStateOf(inputs.bizRatePerKwh.toString()) }
+    var hhCountStr by remember(inputs.hhCount) { mutableStateOf(inputs.hhCount.toString()) }
+    var bizCountStr by remember(inputs.bizCount) { mutableStateOf(inputs.bizCount.toString()) }
+    var capacityKwStr by remember(inputs.capacityKw) { mutableStateOf(inputs.capacityKw.toInt().toString()) }
+
+    val context = LocalContext.current
+
+    // Helper to perform full model recalculation from text changes
+    fun updateInputs(
+        newCapex: Double? = capexStr.toDoubleOrNull(),
+        newUsefulLife: Int? = usefulLifeStr.toIntOrNull(),
+        newStaffing: Double? = staffingStr.toDoubleOrNull(),
+        newMaintenance: Double? = maintenanceStr.toDoubleOrNull(),
+        newBattery: Double? = batteryStr.toDoubleOrNull(),
+        newHhTariff: Double? = hhTariffStr.toDoubleOrNull(),
+        newBizTariff: Double? = bizTariffStr.toDoubleOrNull(),
+        newHhCount: Int? = hhCountStr.toIntOrNull(),
+        newBizCount: Int? = bizCountStr.toIntOrNull(),
+        newCapacityKw: Double? = capacityKwStr.toDoubleOrNull()
+    ) {
+        if (newCapex != null && newUsefulLife != null && newStaffing != null &&
+            newMaintenance != null && newBattery != null && newHhTariff != null &&
+            newBizTariff != null && newHhCount != null && newBizCount != null && newCapacityKw != null
+        ) {
+            onInputsChanged(
+                inputs.copy(
+                    capex = newCapex,
+                    usefulLifeYears = newUsefulLife,
+                    staffingOpexUsd = newStaffing,
+                    maintenanceOpexUsd = newMaintenance,
+                    batteryOpexUsd = newBattery,
+                    hhRatePerKwh = newHhTariff,
+                    bizRatePerKwh = newBizTariff,
+                    hhCount = newHhCount,
+                    bizCount = newBizCount,
+                    capacityKw = newCapacityKw
+                )
+            )
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        // Form Title
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = CardSlate)
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Tune,
+                    contentDescription = "Edit Inputs",
+                    tint = SolarAmber,
+                    modifier = Modifier.size(36.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = "PrecisionIQ Financial Inputs Form",
+                        color = TextLight,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                    Text(
+                        text = "Adjust primary engineering, demand, Capex, Opex and macro-financial variables below. Calculations run in real-time.",
+                        color = TextMuted,
+                        fontSize = 11.sp,
+                        lineHeight = 15.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- SECTION 1: CAPITAL EXPENDITURE (CAPEX) & ENGINEERING ---
+        Text(
+            text = "1. CAPITAL EXPENDITURE (CAPEX) & CAPACITY",
+            color = SolarAmber,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            letterSpacing = 1.2.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = CardSlate),
+            border = BorderStroke(0.5.dp, BorderSlate)
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                FormTextField(
+                    label = "Upfront Grid CAPEX",
+                    value = capexStr,
+                    onValueChange = {
+                        capexStr = it
+                        updateInputs(newCapex = it.toDoubleOrNull())
+                    },
+                    prefix = "$",
+                    suffix = "USD",
+                    testTag = "input_capex"
+                )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        FormTextField(
+                            label = "Generator Capacity",
+                            value = capacityKwStr,
+                            onValueChange = {
+                                capacityKwStr = it
+                                updateInputs(newCapacityKw = it.toDoubleOrNull())
+                            },
+                            suffix = "kW",
+                            testTag = "input_capacity"
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        FormTextField(
+                            label = "Asset Useful Life",
+                            value = usefulLifeStr,
+                            onValueChange = {
+                                usefulLifeStr = it
+                                updateInputs(newUsefulLife = it.toIntOrNull())
+                            },
+                            suffix = "Years",
+                            testTag = "input_useful_life"
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- SECTION 2: OPERATING EXPENDITURE (OPEX) ---
+        Text(
+            text = "2. OPERATING EXPENDITURE (OPEX) - YEAR 1 BASE",
+            color = SolarAmber,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            letterSpacing = 1.2.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = CardSlate),
+            border = BorderStroke(0.5.dp, BorderSlate)
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                FormTextField(
+                    label = "Annual Operating Staffing Opex",
+                    value = staffingStr,
+                    onValueChange = {
+                        staffingStr = it
+                        updateInputs(newStaffing = it.toDoubleOrNull())
+                    },
+                    prefix = "$",
+                    suffix = "USD/yr",
+                    testTag = "input_staffing"
+                )
+                FormTextField(
+                    label = "Annual System Maintenance & Insurance",
+                    value = maintenanceStr,
+                    onValueChange = {
+                        maintenanceStr = it
+                        updateInputs(newMaintenance = it.toDoubleOrNull())
+                    },
+                    prefix = "$",
+                    suffix = "USD/yr",
+                    testTag = "input_maintenance"
+                )
+                FormTextField(
+                    label = "Year 3 Battery Replacement Reserve",
+                    value = batteryStr,
+                    onValueChange = {
+                        batteryStr = it
+                        updateInputs(newBattery = it.toDoubleOrNull())
+                    },
+                    prefix = "$",
+                    suffix = "USD",
+                    testTag = "input_battery"
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- SECTION 3: TARIFFS & CUSTOMERS ---
+        Text(
+            text = "3. DEMAND, CONNECTIONS & TARIFFS",
+            color = SolarAmber,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            letterSpacing = 1.2.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = CardSlate),
+            border = BorderStroke(0.5.dp, BorderSlate)
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        FormTextField(
+                            label = "Household Connections",
+                            value = hhCountStr,
+                            onValueChange = {
+                                hhCountStr = it
+                                updateInputs(newHhCount = it.toIntOrNull())
+                            },
+                            suffix = "units",
+                            testTag = "input_hh_count"
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        FormTextField(
+                            label = "Household Tariff",
+                            value = hhTariffStr,
+                            onValueChange = {
+                                hhTariffStr = it
+                                updateInputs(newHhTariff = it.toDoubleOrNull())
+                            },
+                            prefix = "$",
+                            suffix = "/kWh",
+                            testTag = "input_hh_tariff"
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        FormTextField(
+                            label = "Business Connections",
+                            value = bizCountStr,
+                            onValueChange = {
+                                bizCountStr = it
+                                updateInputs(newBizCount = it.toIntOrNull())
+                            },
+                            suffix = "units",
+                            testTag = "input_biz_count"
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        FormTextField(
+                            label = "Small Business Tariff",
+                            value = bizTariffStr,
+                            onValueChange = {
+                                bizTariffStr = it
+                                updateInputs(newBizTariff = it.toDoubleOrNull())
+                            },
+                            prefix = "$",
+                            suffix = "/kWh",
+                            testTag = "input_biz_tariff"
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- SECTION 4: MACROECONOMICS & SLIDERS ---
+        Text(
+            text = "4. MACRO-FINANCIALS & RISK PARAMETERS",
+            color = SolarAmber,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            letterSpacing = 1.2.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = CardSlate),
+            border = BorderStroke(0.5.dp, BorderSlate)
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                // Debt Ratio slider
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Project Debt Financing Ratio", color = TextLight, fontSize = 12.sp)
+                        Text("${(inputs.debtRatio * 100).toInt()}%", color = SolarAmber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Slider(
+                        value = inputs.debtRatio.toFloat(),
+                        onValueChange = { onInputsChanged(inputs.copy(debtRatio = it.toDouble())) },
+                        valueRange = 0.30f..0.90f
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Customer Growth Rate slider
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Baseline Annual Customer Growth Rate", color = TextLight, fontSize = 12.sp)
+                        Text("${(inputs.customerGrowthRate * 100).toInt()}%", color = SolarAmber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Slider(
+                        value = inputs.customerGrowthRate.toFloat(),
+                        onValueChange = { onInputsChanged(inputs.copy(customerGrowthRate = it.toDouble())) },
+                        valueRange = 0.00f..0.25f,
+                        modifier = Modifier.testTag("slider_customer_growth_rate")
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Default Rate slider
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("PAYG Customer Default Rate", color = TextLight, fontSize = 12.sp)
+                        Text("${(inputs.defaultRate * 100).toInt()}%", color = SolarAmber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Slider(
+                        value = inputs.defaultRate.toFloat(),
+                        onValueChange = { onInputsChanged(inputs.copy(defaultRate = it.toDouble())) },
+                        valueRange = 0.00f..0.25f
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Malawi Inflation slider
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Malawi Inflation Rate", color = TextLight, fontSize = 12.sp)
+                        Text("${(inputs.inflationRate * 100).toInt()}%", color = SolarAmber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Slider(
+                        value = inputs.inflationRate.toFloat(),
+                        onValueChange = { onInputsChanged(inputs.copy(inflationRate = it.toDouble())) },
+                        valueRange = 0.05f..0.30f
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Interest rate slider
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Project Local Interest Rate", color = TextLight, fontSize = 12.sp)
+                        Text("${(inputs.interestRate * 100).toInt()}%", color = SolarAmber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Slider(
+                        value = inputs.interestRate.toFloat(),
+                        onValueChange = { onInputsChanged(inputs.copy(interestRate = it.toDouble())) },
+                        valueRange = 0.05f..0.35f
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Reset inputs button
+        Button(
+            onClick = {
+                onInputsChanged(FinancialEngine.ModelInputs())
+                Toast.makeText(context, "Model reset to standard base parameters", Toast.LENGTH_SHORT).show()
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .testTag("reset_form_button")
+        ) {
+            Icon(imageVector = Icons.Default.Refresh, contentDescription = "Reset Form")
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Reset to Case Assumptions", color = Color.White, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+    }
+}
+
+// ==============================================================================
 // 2. TABS: HORIZONTALLY SCROLLABLE FINANCIAL PROJECTIONS (TABLE)
 // ==============================================================================
 @Composable
@@ -1429,7 +1895,7 @@ fun TableRowData(
 // 3. TABS: RISK MODULES (SENSITIVITY & MONTE CARLO GRAPH)
 // ==============================================================================
 @Composable
-fun RiskModuleTab(outputs: FinancialEngine.ModelOutputs) {
+fun RiskModuleTab(outputs: FinancialEngine.ModelOutputs, inputs: FinancialEngine.ModelInputs) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -1529,6 +1995,209 @@ fun RiskModuleTab(outputs: FinancialEngine.ModelOutputs) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // --- NEW SECTION: CUSTOMER COUNT VS TARIFF SENSITIVITY ---
+        Text(
+            text = "SENSITIVITY ANALYSIS: CUSTOMER COUNT VS TARIFF",
+            color = TextMuted,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.5.sp,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth().testTag("customer_tariff_sensitivity_card"),
+            colors = CardDefaults.cardColors(containerColor = CardSlate)
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = "Analyze how simultaneous changes in connection counts (rows) and tariff rates (columns) affect the project's financial feasibility. Calculated dynamically in real-time.",
+                    color = TextMuted,
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                // Metric Toggle (IRR vs NPV)
+                var selectedMetric by remember { mutableStateOf(0) } // 0 = IRR, 1 = NPV
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                        .background(DarkSlate, RoundedCornerShape(8.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(32.dp)
+                            .background(
+                                if (selectedMetric == 0) SolarAmber else Color.Transparent,
+                                RoundedCornerShape(6.dp)
+                            )
+                            .clickable { selectedMetric = 0 }
+                            .testTag("sensitivity_toggle_irr")
+                    ) {
+                        Text(
+                            text = "PROJECT IRR",
+                            color = if (selectedMetric == 0) Color.Black else TextMuted,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(32.dp)
+                            .background(
+                                if (selectedMetric == 1) SolarAmber else Color.Transparent,
+                                RoundedCornerShape(6.dp)
+                            )
+                            .clickable { selectedMetric = 1 }
+                            .testTag("sensitivity_toggle_npv")
+                    ) {
+                        Text(
+                            text = "PROJECT NPV",
+                            color = if (selectedMetric == 1) Color.Black else TextMuted,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                val custTariffGrid = remember(inputs) {
+                    FinancialEngine.generateCustomerTariffSensitivity(inputs)
+                }
+
+                val columns = listOf("-20% Tar", "-10% Tar", "Base Tar", "+10% Tar", "+20% Tar")
+                val rows = listOf("-20% Cust", "-10% Cust", "Base Cust", "+10% Cust", "+20% Cust")
+
+                // Top column headers
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("", modifier = Modifier.weight(1.2f), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    for (col in columns) {
+                        Text(
+                            text = col,
+                            color = TextMuted,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Grid Cells
+                custTariffGrid.forEachIndexed { rIdx, row ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Left row label
+                        Text(
+                            text = rows[rIdx],
+                            color = TextLight,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1.2f)
+                        )
+
+                        row.forEach { cell ->
+                            val cellColor = if (selectedMetric == 0) {
+                                when {
+                                    cell.projectIrr >= 0.25 -> Color(0xFF047857) // Dark Emerald Green
+                                    cell.projectIrr in 0.15..0.25 -> Color(0xFF059669) // Emerald Green
+                                    cell.projectIrr in 0.08..0.15 -> Color(0xFFD97706) // Orange/Amber
+                                    cell.projectIrr in 0.0..0.08 -> Color(0xFFEA580C) // Dark Orange
+                                    else -> Color(0xFFDC2626) // Bright Red
+                                }
+                            } else {
+                                when {
+                                    cell.projectNpv >= 100_000.0 -> Color(0xFF047857)
+                                    cell.projectNpv in 0.0..100_000.0 -> Color(0xFF059669)
+                                    cell.projectNpv in -50_000.0..0.0 -> Color(0xFFD97706)
+                                    cell.projectNpv in -100_000.0..-50_000.0 -> Color(0xFFEA580C)
+                                    else -> Color(0xFFDC2626)
+                                }
+                            }
+
+                            val cellText = if (selectedMetric == 0) {
+                                if (cell.projectIrr < 0.0) "Neg" else String.format("%.1f%%", cell.projectIrr * 100)
+                            } else {
+                                formatCompactCurrency(cell.projectNpv)
+                            }
+
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(cellColor, RoundedCornerShape(4.dp))
+                                    .padding(vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = cellText,
+                                    color = Color.White,
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Extra dynamic statistics/insights based on grid values
+                val baseCell = custTariffGrid[2][2] // 100% multiplier row and column
+                val baseValueStr = if (selectedMetric == 0) String.format("%.1f%%", baseCell.projectIrr * 100) else formatCurrency(baseCell.projectNpv)
+                val worstCell = custTariffGrid[0][0] // -20% customer and -20% tariff
+                val worstValueStr = if (selectedMetric == 0) (if (worstCell.projectIrr < 0.0) "Negative" else String.format("%.1f%%", worstCell.projectIrr * 100)) else formatCurrency(worstCell.projectNpv)
+                val bestCell = custTariffGrid[4][4] // +20% customer and +20% tariff
+                val bestValueStr = if (selectedMetric == 0) String.format("%.1f%%", bestCell.projectIrr * 100) else formatCurrency(bestCell.projectNpv)
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(DarkSlate, RoundedCornerShape(6.dp))
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "SENSITIVITY INSIGHTS",
+                        color = SolarAmber,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = "• Base Scenario: $baseValueStr",
+                        color = TextLight,
+                        fontSize = 9.sp
+                    )
+                    Text(
+                        text = "• Worst Case (-20% Cust / -20% Tar): $worstValueStr",
+                        color = if (worstCell.projectIrr < 0.0 || worstCell.projectNpv < 0.0) RedLoss else TextLight,
+                        fontSize = 9.sp
+                    )
+                    Text(
+                        text = "• Best Case (+20% Cust / +20% Tar): $bestValueStr",
+                        color = EmeraldGreen,
+                        fontSize = 9.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         // --- SECTION 2: MONTE CARLO ---
         Text(
             text = "STOCHASTIC MONTE CARLO ANALYSIS (1,000 RUNS)",
@@ -1545,7 +2214,7 @@ fun RiskModuleTab(outputs: FinancialEngine.ModelOutputs) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Varies: Capacity Factor (stdev 10%), Customer Default (stdev 2%), MWK Depreciation (stdev 2.5%) under independent Gaussian walks.",
+                    text = "Varies: Upfront CAPEX (stdev 8%), Customer Growth (stdev 2.5%), Capacity Factor (stdev 10%), Customer Default (stdev 2%), MWK Depreciation (stdev 2.5%) under independent Gaussian walks.",
                     color = TextMuted,
                     fontSize = 10.sp,
                     lineHeight = 14.sp,
@@ -1576,6 +2245,48 @@ fun RiskModuleTab(outputs: FinancialEngine.ModelOutputs) {
                     Column {
                         Text("Viability (NPV > 0)", color = TextMuted, fontSize = 11.sp)
                         Text(String.format("%.1f%%", outputs.monteCarloResult.probabilityOfPositiveNpv * 100), color = SolarAmber, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Confidence Intervals Section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(DarkSlate, RoundedCornerShape(8.dp))
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = "PROJECT NPV CONFIDENCE INTERVALS",
+                        color = SolarAmber,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("90% Confidence Interval", color = TextMuted, fontSize = 9.sp)
+                            Text(
+                                text = "[${formatCurrency(outputs.monteCarloResult.confidenceLower90)}, ${formatCurrency(outputs.monteCarloResult.confidenceUpper90)}]",
+                                color = TextLight,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("95% Confidence Interval", color = TextMuted, fontSize = 9.sp)
+                            Text(
+                                text = "[${formatCurrency(outputs.monteCarloResult.confidenceLower95)}, ${formatCurrency(outputs.monteCarloResult.confidenceUpper95)}]",
+                                color = TextLight,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
 
@@ -1818,4 +2529,14 @@ private fun formatCurrency(value: Double): String {
 
 private fun formatCurrencyWithDec(value: Double): String {
     return String.format("$%,.3f", value)
+}
+
+private fun formatCompactCurrency(value: Double): String {
+    val absVal = Math.abs(value)
+    val formatted = when {
+        absVal >= 1_000_000.0 -> String.format("%.1fM", value / 1_000_000.0)
+        absVal >= 1_000.0 -> String.format("%.0fk", value / 1_000.0)
+        else -> String.format("%.0f", value)
+    }
+    return if (value < 0) "($formatted)" else "$$formatted"
 }

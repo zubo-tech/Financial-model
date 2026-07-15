@@ -34,7 +34,11 @@ object FinancialEngine {
         val usefulLifeYears: Int = 10, // Straight-line depreciation over 10 years
         val taxRate: Double = 0.30, // 30% Malawi Corporate Tax
         val discountRate: Double = 0.15, // WACC / Discount Rate
-        val initialFxRate: Double = 1700.0 // MWK per USD
+        val initialFxRate: Double = 1700.0, // MWK per USD
+        val staffingOpexUsd: Double = 9000.0,
+        val maintenanceOpexUsd: Double = 6000.0,
+        val batteryOpexUsd: Double = 30000.0,
+        val customerGrowthRate: Double = 0.05
     )
 
     data class StatementYear(
@@ -98,6 +102,13 @@ object FinancialEngine {
         val projectNpv: Double
     )
 
+    data class CustomerTariffSensitivityCell(
+        val customerCountMultiplier: Double,
+        val tariffMultiplier: Double,
+        val projectIrr: Double,
+        val projectNpv: Double
+    )
+
     data class MonteCarloResult(
         val runs: List<Double>, // List of NPVs
         val irrRuns: List<Double>, // List of IRRs
@@ -106,7 +117,11 @@ object FinancialEngine {
         val minNpv: Double,
         val maxNpv: Double,
         val probabilityOfPositiveNpv: Double,
-        val valueAtRisk5Percent: Double
+        val valueAtRisk5Percent: Double,
+        val confidenceLower90: Double,
+        val confidenceUpper90: Double,
+        val confidenceLower95: Double,
+        val confidenceUpper95: Double
     )
 
     data class ModelOutputs(
@@ -153,10 +168,11 @@ object FinancialEngine {
             // Total capacity generation = 100kW * CF * 8760
             val energyGeneratedKwh = inputs.capacityKw * inputs.capacityFactor * 8760.0
             
+            val growthFactor = (1.0 + inputs.customerGrowthRate).pow((t - 1).toDouble())
             // Households: 500 HHs consuming hhDailyKwh/day
-            val energyConsumedHhKwh = inputs.hhCount * inputs.hhDailyKwh * 365.0
+            val energyConsumedHhKwh = (inputs.hhCount * growthFactor) * inputs.hhDailyKwh * 365.0
             // Businesses: 20 Businesses consuming bizDailyKwh/day
-            val energyConsumedBizKwh = inputs.bizCount * inputs.bizDailyKwh * 365.0
+            val energyConsumedBizKwh = (inputs.bizCount * growthFactor) * inputs.bizDailyKwh * 365.0
 
             // 3. Tariff Indexation
             // Standard frontier IPP contract indexes local currency tariffs to local inflation (18%):
@@ -180,9 +196,9 @@ object FinancialEngine {
 
             // 5. Operating Expenses (Local Opex inflated at 18%, converted to USD)
             // Base local opex assumptions in Year 1
-            val baseStaffingMwk = 9000.0 * inputs.initialFxRate
-            val baseMaintenanceMwk = 6000.0 * inputs.initialFxRate
-            val baseBatteryMwk = if (t == 3) 30000.0 * inputs.initialFxRate else 0.0
+            val baseStaffingMwk = inputs.staffingOpexUsd * inputs.initialFxRate
+            val baseMaintenanceMwk = inputs.maintenanceOpexUsd * inputs.initialFxRate
+            val baseBatteryMwk = if (t == 3) inputs.batteryOpexUsd * inputs.initialFxRate else 0.0
 
             // Inflated local currency Opex
             val staffingMwk = baseStaffingMwk * (1.0 + inputs.inflationRate).pow((t - 1).toDouble())
@@ -467,6 +483,34 @@ object FinancialEngine {
         return grid
     }
 
+    fun generateCustomerTariffSensitivity(baseInputs: ModelInputs): List<List<CustomerTariffSensitivityCell>> {
+        val customerSteps = listOf(0.80, 0.90, 1.0, 1.10, 1.20) // -20% to +20% customer connections
+        val tariffSteps = listOf(0.80, 0.90, 1.0, 1.10, 1.20) // -20% to +20% tariff per kWh
+        val grid = mutableListOf<List<CustomerTariffSensitivityCell>>()
+
+        for (custMult in customerSteps) {
+            val row = mutableListOf<CustomerTariffSensitivityCell>()
+            for (tariffMult in tariffSteps) {
+                // Adjust counts and tariffs
+                val adjustedInputs = baseInputs.copy(
+                    hhCount = (baseInputs.hhCount * custMult).toInt(),
+                    bizCount = (baseInputs.bizCount * custMult).toInt(),
+                    hhRatePerKwh = baseInputs.hhRatePerKwh * tariffMult,
+                    bizRatePerKwh = baseInputs.bizRatePerKwh * tariffMult
+                )
+                val out = runModelForSensitivity(adjustedInputs)
+                row.add(CustomerTariffSensitivityCell(
+                    customerCountMultiplier = custMult,
+                    tariffMultiplier = tariffMult,
+                    projectIrr = out.projectIrr,
+                    projectNpv = out.projectNpv
+                ))
+            }
+            grid.add(row)
+        }
+        return grid
+    }
+
     // Faster model runner for risk modeling to keep overhead tiny
     private class SensitivityOutput(val projectIrr: Double, val projectNpv: Double)
     
@@ -486,8 +530,9 @@ object FinancialEngine {
         for (t in 1..5) {
             val fxRate = inputs.initialFxRate * (1.0 + inputs.mwkDepreciationRate).pow(t.toDouble())
             val energyGenerated = inputs.capacityKw * inputs.capacityFactor * 8760.0
-            val energyHH = inputs.hhCount * inputs.hhDailyKwh * 365.0
-            val energyBiz = inputs.bizCount * inputs.bizDailyKwh * 365.0
+            val growthFactor = (1.0 + inputs.customerGrowthRate).pow((t - 1).toDouble())
+            val energyHH = (inputs.hhCount * growthFactor) * inputs.hhDailyKwh * 365.0
+            val energyBiz = (inputs.bizCount * growthFactor) * inputs.bizDailyKwh * 365.0
 
             val tariffHhMwk = (inputs.hhRatePerKwh * inputs.initialFxRate) * (1.0 + inputs.inflationRate).pow((t - 1).toDouble())
             val tariffBizMwk = (inputs.bizRatePerKwh * inputs.initialFxRate) * (1.0 + inputs.inflationRate).pow((t - 1).toDouble())
@@ -500,9 +545,9 @@ object FinancialEngine {
             val mmFee = cashToCollect * inputs.mobileMoneyFeeRate
             val netRev = cashToCollect - mmFee
 
-            val baseStaff = 9000.0 * inputs.initialFxRate
-            val baseMaint = 6000.0 * inputs.initialFxRate
-            val baseBattery = if (t == 3) 30000.0 * inputs.initialFxRate else 0.0
+            val baseStaff = inputs.staffingOpexUsd * inputs.initialFxRate
+            val baseMaint = inputs.maintenanceOpexUsd * inputs.initialFxRate
+            val baseBattery = if (t == 3) inputs.batteryOpexUsd * inputs.initialFxRate else 0.0
             val staffCostUsd = (baseStaff * (1.0 + inputs.inflationRate).pow((t - 1).toDouble())) / fxRate
             val maintCostUsd = (baseMaint * (1.0 + inputs.inflationRate).pow((t - 1).toDouble())) / fxRate
             val batCostUsd = (baseBattery * (1.0 + inputs.inflationRate).pow((t - 1).toDouble())) / fxRate
@@ -554,16 +599,24 @@ object FinancialEngine {
 
         for (run in 1..totalRuns) {
             // Model stochastic drivers
-            // 1. Capacity Factor: Gaussian centered on base, SD = 0.025 (10% of base value 0.25)
+            // 1. Upfront CAPEX: Gaussian centered on base, SD = 8% of base CAPEX
+            val stochCapex = (inputs.capex + random.nextGaussian() * (inputs.capex * 0.08)).coerceAtLeast(inputs.capex * 0.5)
+
+            // 2. Customer Growth Rate: Gaussian centered on base, SD = 2.5%
+            val stochGrowth = (inputs.customerGrowthRate + random.nextGaussian() * 0.025).coerceIn(-0.05, 0.25)
+
+            // 3. Capacity Factor: Gaussian centered on base, SD = 0.025 (10% of base value 0.25)
             val stochCf = (inputs.capacityFactor + random.nextGaussian() * 0.025).coerceIn(0.12, 0.35)
 
-            // 2. Default Rate: Gaussian centered on base, SD = 0.02
+            // 4. Default Rate: Gaussian centered on base, SD = 0.02
             val stochDefault = (inputs.defaultRate + random.nextGaussian() * 0.02).coerceIn(0.01, 0.25)
 
-            // 3. Currency Depreciation: Gaussian centered on base, SD = 0.03
+            // 5. Currency Depreciation: Gaussian centered on base, SD = 0.03
             val stochDeprec = (inputs.mwkDepreciationRate + random.nextGaussian() * 0.03).coerceIn(0.01, 0.25)
 
             val runInputs = inputs.copy(
+                capex = stochCapex,
+                customerGrowthRate = stochGrowth,
                 capacityFactor = stochCf,
                 defaultRate = stochDefault,
                 mwkDepreciationRate = stochDeprec
@@ -597,6 +650,12 @@ object FinancialEngine {
         val varIdx = (totalRuns * 0.05).toInt().coerceIn(0, totalRuns - 1)
         val valueAtRisk5Percent = sortedNpvs[varIdx]
 
+        // Confidence Intervals
+        val confidenceLower90 = sortedNpvs[(totalRuns * 0.05).toInt().coerceIn(0, totalRuns - 1)]
+        val confidenceUpper90 = sortedNpvs[(totalRuns * 0.95).toInt().coerceIn(0, totalRuns - 1)]
+        val confidenceLower95 = sortedNpvs[(totalRuns * 0.025).toInt().coerceIn(0, totalRuns - 1)]
+        val confidenceUpper95 = sortedNpvs[(totalRuns * 0.975).toInt().coerceIn(0, totalRuns - 1)]
+
         return MonteCarloResult(
             runs = sortedNpvs,
             irrRuns = sortedIrrs,
@@ -605,13 +664,17 @@ object FinancialEngine {
             minNpv = minNpv,
             maxNpv = maxNpv,
             probabilityOfPositiveNpv = probabilityOfPositiveNpv,
-            valueAtRisk5Percent = valueAtRisk5Percent
+            valueAtRisk5Percent = valueAtRisk5Percent,
+            confidenceLower90 = confidenceLower90,
+            confidenceUpper90 = confidenceUpper90,
+            confidenceLower95 = confidenceLower95,
+            confidenceUpper95 = confidenceUpper95
         )
     }
 
     // --- EXCEL GENERATOR IN PYTHON (AS STRING OUTPUT) ---
 
-    fun getPythonExcelCode(): String {
+    fun getPythonExcelCode(inputs: ModelInputs = ModelInputs()): String {
         return """# -*- coding: utf-8 -*-
 ""${'"'}
 Solar_Malawi_Model.py
@@ -634,34 +697,34 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 # ==============================================================================
 # 1. MODEL INPUT ASSUMPTIONS (DETERMINISTIC)
 # ==============================================================================
-CAPACITY_KW = 100.0             # Grid generator size
-CAPACITY_FACTOR = 0.25          # 25% average capacity factor
+CAPACITY_KW = ${inputs.capacityKw}             # Grid generator size
+CAPACITY_FACTOR = ${inputs.capacityFactor}          # average capacity factor
 HOURS_PER_YEAR = 8760           # Standard calendar hours
 
 # Customer Profile & Base Demand
-HH_COUNT = 500
-HH_DAILY_KWH = 0.8              # 0.8 kWh average residential daily use
-HH_RATE_USD = 0.30              # Household tariff per kWh
+HH_COUNT = ${inputs.hhCount}
+HH_DAILY_KWH = ${inputs.hhDailyKwh}              # average residential daily use
+HH_RATE_USD = ${inputs.hhRatePerKwh}              # Household tariff per kWh
 
-BIZ_COUNT = 20
-BIZ_DAILY_KWH = 10.0            # 10.0 kWh average business daily use
-BIZ_RATE_USD = 0.25             # Small business tariff per kWh
+BIZ_COUNT = ${inputs.bizCount}
+BIZ_DAILY_KWH = ${inputs.bizDailyKwh}            # average business daily use
+BIZ_RATE_USD = ${inputs.bizRatePerKwh}             # Small business tariff per kWh
 
 # Financial Structures
-CAPEX_UPFRONT = 180000.0        # Total upfront capex
-DEBT_RATIO = 0.70               # 70% Debt financing
-EQUITY_RATIO = 0.30             # 30% Equity financing
-INTEREST_RATE = 0.22            # 22% Interest on Malawi local currency-linked project debt
-DISCOUNT_RATE = 0.15            # Project WACC / Hurdle Rate
-TAX_RATE = 0.30                 # 30% Malawi Corporate Tax Rate
-USEFUL_LIFE = 10                # 10 Years straight line useful life (Salvage = 0)
+CAPEX_UPFRONT = ${inputs.capex}        # Total upfront capex
+DEBT_RATIO = ${inputs.debtRatio}               # Debt financing
+EQUITY_RATIO = ${1.0 - inputs.debtRatio}             # Equity financing
+INTEREST_RATE = ${inputs.interestRate}            # Interest on Malawi local currency-linked project debt
+DISCOUNT_RATE = ${inputs.discountRate}            # Project WACC / Hurdle Rate
+TAX_RATE = ${inputs.taxRate}                 # Corporate Tax Rate
+USEFUL_LIFE = ${inputs.usefulLifeYears}                # Years straight line useful life (Salvage = 0)
 
 # Macro & PAYG Adjustments
-INFLATION_RATE = 0.18           # 18% Malawi local currency inflation
-MWK_DEPREC_RATE = 0.10          # 10% annual depreciation of MWK vs USD
-INITIAL_FX_RATE = 1700.0        # MWK per USD exchange rate
-DEFAULT_RATE = 0.08             # 8% Customer uncollected revenue rate
-MOBILE_MONEY_FEE = 0.015        # 1.5% transaction cost on mobile collections
+INFLATION_RATE = ${inputs.inflationRate}           # Malawi local currency inflation
+MWK_DEPREC_RATE = ${inputs.mwkDepreciationRate}          # annual depreciation of MWK vs USD
+INITIAL_FX_RATE = ${inputs.initialFxRate}        # MWK per USD exchange rate
+DEFAULT_RATE = ${inputs.defaultRate}             # Customer uncollected revenue rate
+MOBILE_MONEY_FEE = ${inputs.mobileMoneyFeeRate}        # transaction cost on mobile collections
 
 # ==============================================================================
 # 2. RUN 5-YEAR FINANCIAL PROJECTIONS
@@ -712,9 +775,9 @@ def run_deterministic_model():
         net_revenue = net_collected - mm_fee
 
         # Local Opex inflated at 18% in MWK and converted to USD
-        base_staff_mwk = 9000.0 * INITIAL_FX_RATE
-        base_maint_mwk = 6000.0 * INITIAL_FX_RATE
-        base_battery_mwk = (30000.0 * INITIAL_FX_RATE) if t == 3 else 0.0
+        base_staff_mwk = ${inputs.staffingOpexUsd} * INITIAL_FX_RATE
+        base_maint_mwk = ${inputs.maintenanceOpexUsd} * INITIAL_FX_RATE
+        base_battery_mwk = (${inputs.batteryOpexUsd} * INITIAL_FX_RATE) if t == 3 else 0.0
 
         staff_usd = (base_staff_mwk * ((1.0 + INFLATION_RATE) ** (t - 1))) / fx_rate
         maint_usd = (base_maint_mwk * ((1.0 + INFLATION_RATE) ** (t - 1))) / fx_rate

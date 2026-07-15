@@ -1,6 +1,6 @@
 {
-  "name": "Solar Malawi Model",
-  "description": "Financial engineering model & risk simulator for a Solar Mini-Grid + PAYG business in Malawi with Monte Carlo distribution, sensitivity grid, and Python script exporter.",
+  "name": "PrecisionIQ App",
+  "description": "PrecisionIQ financial engineering model & risk forecaster for a Solar Mini-Grid + PAYG business in Malawi with Monte Carlo distribution, sensitivity grid, and Python script exporter.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

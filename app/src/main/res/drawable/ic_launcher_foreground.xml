@@ -3,6 +3,6 @@
     <item
         android:width="66dp"
         android:height="66dp"
-        android:drawable="@drawable/solar_model_icon_1784141232294"
+        android:drawable="@drawable/img_precision_iq_1784151191121"
         android:gravity="center" />
 </layer-list>
