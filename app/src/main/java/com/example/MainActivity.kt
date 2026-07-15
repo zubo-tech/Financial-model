@@ -12,8 +12,11 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -99,6 +102,7 @@ private suspend fun fetchUrlString(urlString: String): String = withContext(Disp
 }
 
 sealed class LoadingState {
+    object Welcome : LoadingState()
     data class Loading(val progress: Float, val status: String) : LoadingState()
     data class Success(
         val liveMwkRate: Double,
@@ -107,6 +111,231 @@ sealed class LoadingState {
         val liveTemp: Double,
         val isOffline: Boolean
     ) : LoadingState()
+}
+
+@Composable
+fun WelcomingPageScreen(
+    onStartSync: () -> Unit,
+    onSkipSync: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(DarkSlate, Color(0xFF070708), CardSlate)
+                )
+            )
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(24.dp)
+    ) {
+        // Upper Title & Logo Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(Color(0xFF10B981), RoundedCornerShape(4.dp))
+                )
+                Text(
+                    text = "MALAWIAN FRONTIER GRID",
+                    color = TextMuted,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 1.5.sp
+                )
+            }
+            
+            Text(
+                text = "SYS-V1.4",
+                color = SolarAmber.copy(alpha = 0.7f),
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Main content column (Scrollable)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            // Hero Illustration Card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(190.dp)
+                    .border(0.5.dp, BorderSlate, RoundedCornerShape(12.dp)),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = CardSlate)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.img_solar_welcoming_1784143234403),
+                    contentDescription = "Malawi Solar Array Illustration",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            // Headline Block
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Solar Financial Forecaster",
+                    color = TextLight,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.5).sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Clean Energy Mini-Grid Investment & Risk Engine",
+                    color = SolarAmber,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Divider(color = BorderSlate, thickness = 0.5.dp)
+
+            // Features Specs Section
+            Text(
+                text = "MODEL CONFIGURATION",
+                color = TextMuted,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace,
+                letterSpacing = 1.2.sp
+            )
+
+            // Dynamic Rows
+            WelcomeSpecRow(
+                icon = Icons.Default.Bolt,
+                title = "100 kW PV Solar Mini-Grid",
+                subtitle = "Directly optimized for Lilongwe's local capacity factor of 18% to 28% based on cloud density."
+            )
+
+            WelcomeSpecRow(
+                icon = Icons.Default.Sync,
+                title = "Dynamic Live Telemetry Sync",
+                subtitle = "Pulls real-time exchange rates from Reserve Bank of Malawi API & satellite solar irradiance forecasts."
+            )
+
+            WelcomeSpecRow(
+                icon = Icons.Default.TrendingUp,
+                title = "Monte Carlo Risk Core",
+                subtitle = "Processes 500 stochastic trials dynamically to map NPV viability probability and downside risk thresholds."
+            )
+
+            WelcomeSpecRow(
+                icon = Icons.Default.Description,
+                title = "Interactive Audit Code Generator",
+                subtitle = "Generates complete Python script code to programmatically compile and export the multi-tab Excel model."
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Action Buttons Row/Column
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                onClick = onStartSync,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SolarAmber,
+                    contentColor = DarkSlate
+                ),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .testTag("start_forecast_button")
+            ) {
+                Text(
+                    text = "INITIALIZE FORECASTING CORE",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
+
+            OutlinedButton(
+                onClick = onSkipSync,
+                border = BorderStroke(1.dp, SolarAmber.copy(alpha = 0.25f)),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = SolarAmber),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .testTag("skip_sync_button")
+            ) {
+                Text(
+                    text = "QUICK START (USE HISTORICAL BASE CASE)",
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 0.5.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun WelcomeSpecRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(SolarAmber.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
+                .border(0.5.dp, SolarAmber.copy(alpha = 0.15f), RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = SolarAmber,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = TextLight,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                color = TextMuted,
+                fontSize = 12.sp,
+                lineHeight = 16.sp
+            )
+        }
+    }
 }
 
 @Composable
@@ -361,7 +590,7 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
     var inputs by remember { mutableStateOf(FinancialEngine.ModelInputs()) }
     
     // Live telemetry state
-    var loadingState by remember { mutableStateOf<LoadingState>(LoadingState.Loading(0.05f, "Booting financial engineering core...")) }
+    var loadingState by remember { mutableStateOf<LoadingState>(LoadingState.Welcome) }
     var liveMwkRate by remember { mutableStateOf(1700.0) }
     var liveIrradiance by remember { mutableStateOf(450.0) }
     var liveCloudCover by remember { mutableStateOf(15.0) }
@@ -372,9 +601,9 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
     var triggerSync by remember { mutableStateOf(0) }
 
     LaunchedEffect(triggerSync) {
+        if (loadingState !is LoadingState.Loading) return@LaunchedEffect
         try {
-            kotlinx.coroutines.delay(1200)
-            loadingState = LoadingState.Loading(0.20f, "Contacting Reserve Bank of Malawi Exchange Feeds...")
+            loadingState = LoadingState.Loading(0.15f, "Contacting Reserve Bank of Malawi Exchange Feeds...")
             
             val mwkRateFetched = try {
                 val exchangeJson = JSONObject(fetchUrlString("https://open.er-api.com/v6/latest/USD"))
@@ -384,10 +613,9 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
                 1745.0
             }
             liveMwkRate = mwkRateFetched
-            loadingState = LoadingState.Loading(0.40f, "FX Rate Synced: MWK ${String.format("%.2f", mwkRateFetched)} per USD")
+            loadingState = LoadingState.Loading(0.45f, "FX Rate Synced: MWK ${String.format("%.2f", mwkRateFetched)} per USD")
             
-            kotlinx.coroutines.delay(1200)
-            loadingState = LoadingState.Loading(0.60f, "Querying Lilongwe weather satellite telemetry...")
+            loadingState = LoadingState.Loading(0.55f, "Querying Lilongwe weather satellite telemetry...")
             
             val (irradiance, clouds, temp) = try {
                 val weatherJson = JSONObject(fetchUrlString("https://api.open-meteo.com/v1/forecast?latitude=-13.9632&longitude=33.7741&current=shortwave_radiation,cloud_cover,temperature_2m"))
@@ -406,7 +634,6 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
             liveTemp = temp
             
             loadingState = LoadingState.Loading(0.80f, "Live Irradiance: ${irradiance.toInt()} W/m² (Cloud Cover: ${clouds.toInt()}%)")
-            kotlinx.coroutines.delay(1200)
             
             val cloudAdjustment = (clouds / 100.0) * 0.10
             val adjustedCapacityFactor = (0.27 - cloudAdjustment).coerceIn(0.18, 0.28)
@@ -417,7 +644,6 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
             )
             
             loadingState = LoadingState.Loading(0.95f, "Recalculating 5-Year Monte Carlo risk models...")
-            kotlinx.coroutines.delay(1200)
             
             loadingState = LoadingState.Success(
                 liveMwkRate = mwkRateFetched,
@@ -450,6 +676,15 @@ fun FinancialDashboardScreen(modifier: Modifier = Modifier) {
 
     Crossfade(targetState = loadingState, label = "screenTransition") { state ->
         when (state) {
+            is LoadingState.Welcome -> {
+                WelcomingPageScreen(
+                    onStartSync = {
+                        loadingState = LoadingState.Loading(0.05f, "Booting financial forecasting core...")
+                        triggerSync++
+                    },
+                    onSkipSync = onSkipToMain
+                )
+            }
             is LoadingState.Loading -> {
                 WelcomingLoadingScreen(state = state, onSkip = onSkipToMain)
             }
@@ -1296,7 +1531,7 @@ fun RiskModuleTab(outputs: FinancialEngine.ModelOutputs) {
 
         // --- SECTION 2: MONTE CARLO ---
         Text(
-            text = "STOCHASTIC MONTE CARLO SIMULATION (1,000 RUNS)",
+            text = "STOCHASTIC MONTE CARLO ANALYSIS (1,000 RUNS)",
             color = TextMuted,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,

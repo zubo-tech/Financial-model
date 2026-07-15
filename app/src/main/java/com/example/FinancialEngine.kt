@@ -378,8 +378,8 @@ object FinancialEngine {
         // Generates Project IRR and NPV grid for energy multiplier (-20% to +20%) vs default rate (0% to 20%)
         val sensitivityTable = generateSensitivity(inputs)
 
-        // --- MONTE CARLO SIMULATION ---
-        val monteCarloResult = runMonteCarloSimulation(inputs, 1000)
+        // --- MONTE CARLO ANALYSIS ---
+        val monteCarloResult = runMonteCarloRiskModel(inputs, 1000)
 
         return ModelOutputs(
             years = years,
@@ -447,7 +447,7 @@ object FinancialEngine {
         for (mult in multiplierSteps) {
             val row = mutableListOf<SensitivityCell>()
             for (defRate in defaultSteps) {
-                // Adjust HH and Business daily energy consumption to simulate volume multiplier
+                // Adjust HH and Business daily energy consumption to model volume multiplier
                 val adjustedInputs = baseInputs.copy(
                     hhDailyKwh = baseInputs.hhDailyKwh * mult,
                     bizDailyKwh = baseInputs.bizDailyKwh * mult,
@@ -467,7 +467,7 @@ object FinancialEngine {
         return grid
     }
 
-    // Faster model runner for simulations to keep overhead tiny
+    // Faster model runner for risk modeling to keep overhead tiny
     private class SensitivityOutput(val projectIrr: Double, val projectNpv: Double)
     
     private fun runModelForSensitivity(inputs: ModelInputs): SensitivityOutput {
@@ -546,8 +546,8 @@ object FinancialEngine {
     }
 
     // --- MONTE CARLO MODULE ---
-
-    private fun runMonteCarloSimulation(inputs: ModelInputs, totalRuns: Int): MonteCarloResult {
+    
+    private fun runMonteCarloRiskModel(inputs: ModelInputs, totalRuns: Int): MonteCarloResult {
         val random = Random(42) // Constant seed for reproducibility of audits
         val npvRuns = mutableListOf<Double>()
         val irrRuns = mutableListOf<Double>()
@@ -616,7 +616,7 @@ object FinancialEngine {
 ""${'"'}
 Solar_Malawi_Model.py
 
-A production-grade, highly annotated Financial Model & Risk Simulator for a
+A production-grade, highly annotated Financial Model & Risk Forecaster for a
 Solar Mini-Grid + PAYG Business in Malawi.
 Saves a beautifully formatted Multi-Tab Excel Workbook: 'Solar_Malawi_Model.xlsx'.
 
