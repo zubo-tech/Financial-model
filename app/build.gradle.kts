@@ -16,7 +16,7 @@ android {
   defaultConfig {
     applicationId = "com.aistudio.solarfinance.kwjpuz"
     minSdk = 24
-    targetSdk = 35
+    targetSdk = 34
     versionCode = 1
     versionName = "1.0"
 
